@@ -25,6 +25,24 @@ pipeline {
           }
         }
       }
+      stage ('Build') {
+        steps {
+          script {
+            withCredentials([file(credentialsId: 'SETTINGS_XML_FILE_ID', variable: 'SECRET_FILE')]) {
+             sh "mvn package -s ${SECRET_FILE}"
+            }
+            }
+          }
+        }
+      stage ('Maven Publish') {
+        steps {
+          script {
+           withCredentials([file(credentialsId: 'SETTINGS_XML_FILE_ID', variable: 'SECRET_FILE')]) {
+             sh "mvn deploy  -s ${SECRET_FILE}"
+           }
+          }
+        }
+      }
     }
 }
             
