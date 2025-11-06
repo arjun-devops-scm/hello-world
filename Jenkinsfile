@@ -56,6 +56,40 @@ pipeline {
           }
         }
       }
+      stage ('docker build') {
+        steps {
+          script {
+            sh "docker build -t arjundocker92/hello-world:${BUILD_NUMBER} ."
+          }
+        }
+      }
+      stage ('Scann Image with Trivy') {
+        steps {
+          script {
+             trivy image --format json --output trivy-image-report.json arjundocker92/hello-world:${BUILD_NUMBER}"
+             archiveArtifacts artifacts: 'trivy-image-report.json', fingerprint: true
+          }
+        }
+      }
+      stage ('Pushing Image into docker hub') {
+        steps {
+          script {
+              withCredentials([usernamePassword(credentialsId: 'docker-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
+                    sh "docker push arjundocker92/hello-world:${BUILD_NUMBER}"
+                }
+          }
+        }
+      }
+      stage ('deploy') {
+        steps {
+          script {
+              sh "docker stop application || true"
+              sh "docker rm application || true"
+              sh "docker run -itd --name application -p 9000:8080 arjundocker92/hello-world:${BUILD_NUMBER}"
+          }
+        }
+      }
     }
 }
             
