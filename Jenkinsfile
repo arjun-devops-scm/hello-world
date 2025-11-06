@@ -66,7 +66,7 @@ pipeline {
       stage ('Scann Image with Trivy') {
         steps {
           script {
-             trivy image --format json --output trivy-image-report.json arjundocker92/hello-world:${BUILD_NUMBER}"
+             sh "trivy image --format json --output trivy-image-report.json arjundocker92/hello-world:${BUILD_NUMBER}"
              archiveArtifacts artifacts: 'trivy-image-report.json', fingerprint: true
           }
         }
