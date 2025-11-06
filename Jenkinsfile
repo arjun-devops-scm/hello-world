@@ -19,9 +19,12 @@ pipeline {
       }
       stage('Security Scan with Trivy') {
             steps {
+              script {
                 // Run Trivy scan and generate JSON report
                 sh "trivy fs --format json --output trivy-report.json ."
                 archiveArtifacts artifacts: 'trivy-report.json', fingerprint: true
+
+              }
 
             }
         }
